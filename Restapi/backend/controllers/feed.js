@@ -3,18 +3,18 @@ const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
   Post.find()
-  .then(posts => {
-    res.status(200).json({
-      message:'Fetched posts successfully',
-      posts:posts
+    .then((posts) => {
+      res.status(200).json({
+        message: 'Fetched posts successfully',
+        posts: posts,
+      });
     })
-  })
-  .catch(err=> {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-    next(err);
-  });
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 exports.createPost = (req, res, next) => {
@@ -24,12 +24,19 @@ exports.createPost = (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
+
+  if (!req.file) {
+    const error = new Error('No Image provided');
+    error.statusCode = 422;
+    throw error;
+  }
+  const imageUrl = req.file.path;
   const title = req.body.title;
   const content = req.body.content;
   const post = new Post({
     title: title,
     content: content,
-    imageUrl: '../images/apple-ipad-pro-129-2022-1.jpg',
+    imageUrl: imageUrl,
     creator: {
       name: 'Mohannad',
     },
