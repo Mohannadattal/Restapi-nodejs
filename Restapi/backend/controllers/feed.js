@@ -60,7 +60,7 @@ exports.createPost = (req, res, next) => {
     .then((result) => {
       return User.findById(req.userId);
     })
-    .then(user => {
+    .then((user) => {
       creator = user;
       user.posts.push(post);
       return user.save();
@@ -126,7 +126,12 @@ exports.updatePost = (req, res, next) => {
     .then((post) => {
       if (!post) {
         const error = new Error('Could not find post');
-        error.status = 404;
+        error.statusCode = 404;
+        throw error;
+      }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
         throw error;
       }
       if (imageUrl !== post.imageUrl) {
@@ -155,6 +160,11 @@ exports.deletePost = (req, res, next) => {
       if (!post) {
         const error = new Error('Could not find post');
         error.statusCode = 404;
+        throw error;
+      }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error('Not authorized!');
+        error.statusCode = 403;
         throw error;
       }
       //Check logged in user
